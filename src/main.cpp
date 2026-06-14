@@ -232,7 +232,7 @@ void restartTelemetry() {
 void setup() {
     Serial.begin(115200);
     delay(1000);
-    Serial.println("\n--- Antigravity SimDash ESP32 Core Booting ---");
+    Serial.println("\n--- SimDash ESP32 Core Booting ---");
 
     // Initialize config manager
     if (!config.begin()) {

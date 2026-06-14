@@ -7,7 +7,7 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AG SimDash Remote Configurator</title>
+    <title>SimDash Remote Configurator</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -475,8 +475,8 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
     <div class="container">
         <header>
             <div class="logo">
-                <div class="logo-icon">AG</div>
-                <div class="logo-text">Antigravity SimDash Dashboard</div>
+                <div class="logo-icon">SD</div>
+                <div class="logo-text">SimDash Dashboard</div>
             </div>
             <div id="connection-badge" class="status-badge">NOT CONNECTED</div>
         </header>
