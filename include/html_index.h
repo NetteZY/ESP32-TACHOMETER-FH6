@@ -694,7 +694,7 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
                             <div class="form-group">
                                 <label for="tel-game">Game Type</label>
                                 <select id="tel-game" onchange="toggleGameFields()">
-                                    <option value="0">Forza Horizon 4 / 5 / Motorsport</option>
+                                    <option value="0">Forza Horizon 4 / 5 / 6</option>
                                     <option value="1">F1 23 / 24 (EA Sports)</option>
                                     <option value="2">DiRT Rally 2.0</option>
                                     <option value="3">Assetto Corsa</option>
