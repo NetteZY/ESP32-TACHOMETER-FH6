@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AG SimDash Tachometer - In-Browser Installer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- ESP Web Tools installer component script -->
+    <script type="module" src="https://unpkg.com/esp-web-tools@9.0.3/dist/web/install-button.js?module"></script>
+    <style>
+        :root {
+            --bg-primary: #0a0e17;
+            --bg-card: rgba(20, 30, 48, 0.65);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent-purple: #8b5cf6;
+            --accent-cyan: #06b6d4;
+            --accent-green: #10b981;
+            --accent-red: #f43f5e;
+            --shadow-glow: 0 0 30px rgba(139, 92, 246, 0.35);
+            --transition-speed: 0.3s;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-image: 
+                radial-gradient(circle at 15% 15%, rgba(139, 92, 246, 0.15) 0%, transparent 45%),
+                radial-gradient(circle at 85% 85%, rgba(6, 182, 212, 0.15) 0%, transparent 45%);
+            background-attachment: fixed;
+            padding: 1.5rem;
+        }
+
+        .installer-card {
+            background-color: var(--bg-card);
+            border-radius: 24px;
+            border: 1px solid var(--border-color);
+            padding: 3rem 2.5rem;
+            max-width: 520px;
+            width: 100%;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .installer-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent-purple), var(--accent-cyan));
+        }
+
+        .logo {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 72px;
+            height: 72px;
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-cyan));
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 2.25rem;
+            box-shadow: var(--shadow-glow);
+            margin-bottom: 1.5rem;
+            color: #fff;
+        }
+
+        h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(to right, #ffffff, #94a3b8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .version {
+            display: inline-block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            background-color: rgba(6, 182, 212, 0.15);
+            color: var(--accent-cyan);
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            border: 1px solid rgba(6, 182, 212, 0.25);
+            margin-bottom: 1.5rem;
+        }
+
+        p.intro {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 2rem;
+        }
+
+        /* Option Tabs */
+        .option-tabs {
+            display: flex;
+            background-color: rgba(10, 14, 23, 0.6);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            padding: 0.25rem;
+            margin-bottom: 2rem;
+        }
+
+        .option-btn {
+            flex: 1;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            padding: 0.6rem;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.875rem;
+            font-family: inherit;
+            transition: all var(--transition-speed);
+        }
+
+        .option-btn.active {
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-cyan));
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.25);
+        }
+
+        .option-content {
+            display: none;
+        }
+
+        .option-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* File Upload styling */
+        .file-upload-container {
+            background-color: rgba(10, 14, 23, 0.4);
+            border: 2px dashed var(--border-color);
+            border-radius: 14px;
+            padding: 2rem 1.5rem;
+            margin-bottom: 2rem;
+            cursor: pointer;
+            transition: all var(--transition-speed);
+        }
+
+        .file-upload-container:hover {
+            border-color: var(--accent-purple);
+            background-color: rgba(139, 92, 246, 0.05);
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .file-upload-label {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+        }
+
+        .file-upload-icon {
+            font-size: 2rem;
+        }
+
+        .file-name-display {
+            font-size: 0.9rem;
+            color: var(--accent-cyan);
+            font-weight: 600;
+            margin-top: 0.5rem;
+        }
+
+        /* Instructions list */
+        .steps-container {
+            text-align: left;
+            background-color: rgba(10, 14, 23, 0.5);
+            border-radius: 14px;
+            padding: 1.25rem 1.5rem;
+            border: 1px solid var(--border-color);
+            margin-bottom: 2rem;
+        }
+
+        .step {
+            display: flex;
+            gap: 0.75rem;
+            margin-bottom: 0.85rem;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            align-items: flex-start;
+        }
+
+        .step:last-child {
+            margin-bottom: 0;
+        }
+
+        .step-num {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.08);
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 0.75rem;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+
+        .step-text b {
+            color: var(--text-primary);
+        }
+
+        /* ESP Web Tools button customization */
+        esp-web-install-button {
+            display: block;
+            margin-bottom: 2rem;
+            --esp-tools-button-color: #fff;
+            --esp-tools-button-bg: linear-gradient(135deg, #8b5cf6, #06b6d4);
+            --esp-tools-button-border-radius: 12px;
+        }
+
+        esp-web-install-button button {
+            cursor: pointer;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+            font-size: 1.1rem;
+            padding: 1rem 2.5rem;
+            border-radius: 12px;
+            border: none;
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-cyan));
+            color: white;
+            box-shadow: var(--shadow-glow);
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        esp-web-install-button button:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+            box-shadow: 0 0 40px rgba(139, 92, 246, 0.5);
+        }
+
+        .unsupported-msg {
+            color: var(--accent-red);
+            font-size: 0.9rem;
+            background-color: rgba(244, 63, 94, 0.1);
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            border: 1px solid rgba(244, 63, 94, 0.2);
+            margin-bottom: 2rem;
+        }
+
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 0.8rem 1.2rem;
+            border-radius: 8px;
+            background-color: rgba(22, 28, 42, 0.9);
+            border-left: 4px solid var(--accent-purple);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            font-size: 0.9rem;
+            z-index: 1000;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        footer {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            font-size: 0.85rem;
+            border-top: 1px solid var(--border-color);
+            padding-top: 1.5rem;
+            color: var(--text-secondary);
+        }
+
+        footer a {
+            color: var(--accent-cyan);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        footer a:hover {
+            color: var(--accent-purple);
+        }
+    </style>
+</head>
+<body>
+    <div class="installer-card">
+        <div class="logo">AG</div>
+        <h1>SimDash Tachometer</h1>
+        <div class="version">Firmware Installer</div>
+        
+        <p class="intro">
+            Connect your ESP32 board to your computer via USB to flash the firmware. Choose whether to download the manifest directly or upload a binary manually.
+        </p>
+
+        <!-- Method selection tabs -->
+        <div class="option-tabs">
+            <button class="option-btn active" onclick="switchMethod('github')">Cloud (GitHub)</button>
+            <button class="option-btn" onclick="switchMethod('local')">Local Binary Upload</button>
+        </div>
+
+        <!-- GitHub Cloud Method -->
+        <div id="method-github" class="option-content active">
+            <div class="steps-container">
+                <div class="step">
+                    <span class="step-num">1</span>
+                    <span class="step-text">Connect the ESP32 board to your PC via <b>USB cable</b>.</span>
+                </div>
+                <div class="step">
+                    <span class="step-num">2</span>
+                    <span class="step-text">Click the <b>Install</b> button below to flash from the cloud.</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Local File Method -->
+        <div id="method-local" class="option-content">
+            <div class="steps-container">
+                <div class="step">
+                    <span class="step-num">1</span>
+                    <span class="step-text">Download <b>merged-firmware.bin</b> from the <a href="https://github.com/NetteZY/ESP32-TACHOMETER-FH6/releases/tag/v1.0.0" target="_blank" style="color:var(--accent-cyan); text-decoration:none;">GitHub Release page</a>.</span>
+                </div>
+                <div class="step">
+                    <span class="step-num">2</span>
+                    <span class="step-text">Upload the file below.</span>
+                </div>
+                <div class="step">
+                    <span class="step-num">3</span>
+                    <span class="step-text">Connect your ESP32 and click <b>Install</b>.</span>
+                </div>
+            </div>
+
+            <div class="file-upload-container" onclick="document.getElementById('file-input').click()">
+                <input type="file" id="file-input" class="file-input" accept=".bin">
+                <div class="file-upload-label">
+                    <span class="file-upload-icon">📁</span>
+                    <span style="font-weight:600;">Choose local firmware.bin</span>
+                    <span style="font-size:0.75rem; color:var(--text-secondary);">Supports merged-firmware.bin (offset 0)</span>
+                    <span id="file-name" class="file-name-display"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ESP Web Tools install element -->
+        <esp-web-install-button id="installer" manifest="https://raw.githubusercontent.com/NetteZY/ESP32-TACHOMETER-FH6/main/manifest.json">
+            <button slot="activate">⚡ Install Firmware</button>
+            <div slot="unsupported" class="unsupported-msg">
+                <b>Web Serial unsupported!</b><br>
+                Please open this page in Google Chrome, Microsoft Edge, or Opera on a desktop computer.
+            </div>
+        </esp-web-install-button>
+
+        <footer>
+            <a href="https://github.com/NetteZY/ESP32-TACHOMETER-FH6" target="_blank">GitHub Repo</a>
+            <span>•</span>
+            <a href="web-tool.html">Device Configurator</a>
+        </footer>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script>
+        const cloudManifestUrl = "https://raw.githubusercontent.com/NetteZY/ESP32-TACHOMETER-FH6/main/manifest.json";
+        let localBinBlobUrl = null;
+        let localManifestBlobUrl = null;
+
+        function showToast(text, isError = false) {
+            const toast = document.getElementById('toast');
+            toast.textContent = text;
+            toast.style.borderLeftColor = isError ? 'var(--accent-red)' : 'var(--accent-purple)';
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        function switchMethod(method) {
+            document.querySelectorAll('.option-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.option-btn').forEach(el => el.classList.remove('active'));
+            
+            document.getElementById('method-' + method).classList.add('active');
+            event.target.classList.add('active');
+
+            const installer = document.getElementById('installer');
+
+            if (method === 'github') {
+                installer.setAttribute('manifest', cloudManifestUrl);
+                showToast("Configured to flash from GitHub Cloud.");
+            } else {
+                if (localManifestBlobUrl) {
+                    installer.setAttribute('manifest', localManifestBlobUrl);
+                    showToast("Configured to flash uploaded local file.");
+                } else {
+                    installer.removeAttribute('manifest'); // Disable installer button until file uploaded
+                    showToast("Please upload a local binary first.", true);
+                }
+            }
+        }
+
+        // Handle file upload
+        document.getElementById('file-input').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            document.getElementById('file-name').textContent = `${file.name} (${Math.round(file.size / 1024)} KB)`;
+
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                const arrayBuffer = evt.target.result;
+
+                // Clean up previous blob URLs if any
+                if (localBinBlobUrl) URL.revokeObjectURL(localBinBlobUrl);
+                if (localManifestBlobUrl) URL.revokeObjectURL(localManifestBlobUrl);
+
+                // Create Blob from binary array
+                const binBlob = new Blob([arrayBuffer], { type: 'application/octet-stream' });
+                localBinBlobUrl = URL.createObjectURL(binBlob);
+
+                // Create dynamic manifest with blob path at offset 0
+                const manifestJson = {
+                    "name": "Local Firmware Upload",
+                    "version": "Local",
+                    "builds": [
+                        {
+                            "chipFamily": "ESP32",
+                            "parts": [
+                                { "path": localBinBlobUrl, "offset": 0 }
+                            ]
+                        }
+                    ]
+                };
+
+                // Create Blob for manifest JSON
+                const manifestBlob = new Blob([JSON.stringify(manifestJson)], { type: 'application/json' });
+                localManifestBlobUrl = URL.createObjectURL(manifestBlob);
+
+                // Update installer manifest attribute
+                const installer = document.getElementById('installer');
+                installer.setAttribute('manifest', localManifestBlobUrl);
+
+                showToast("Local binary successfully loaded! Ready to install.");
+            };
+            reader.readAsArrayBuffer(file);
+        });
+    </script>
+</body>
+</html>
