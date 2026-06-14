@@ -482,7 +482,7 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
         </header>
 
         <!-- Connection Card -->
-        <div class="card">
+        <div class="card" id="connection-card">
             <div class="card-title">Connect to Device</div>
             <p class="description">
                 Enter your ESP32 IP address below to manage settings and view live telemetry. 
@@ -658,7 +658,7 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
                                 </div>
                                 <div class="form-group">
                                     <label for="wifi-pass">WiFi Password</label>
-                                    <input type="password" id="wifi-pass" placeholder="••••••••">
+                                    <input type="password" id="wifi-pass" placeholder="Enter WiFi password">
                                 </div>
                             </div>
 
@@ -850,6 +850,7 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
                 .then(cfg => {
                     populateUI(cfg);
                     document.getElementById('config-panel').style.display = 'block';
+                    document.getElementById('connection-card').style.display = 'none';
                     btn.textContent = "🔌 Re-Connect";
                     badge.textContent = "CONNECTED";
                     badge.className = "status-badge connected";
@@ -861,6 +862,7 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
                     badge.textContent = "CONNECTION FAILED";
                     badge.className = "status-badge";
                     document.getElementById('config-panel').style.display = 'none';
+                    document.getElementById('connection-card').style.display = 'block';
                     stopPolling();
                     showToast("Failed to connect to ESP32. Check IP address and CORS status.", true);
                 });
@@ -870,6 +872,8 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
             document.getElementById('wifi-ssid').value = cfg.wifi.ssid;
             document.getElementById('wifi-opmode').value = cfg.wifi.apMode ? "ap" : "client";
             document.getElementById('wifi-apname').value = cfg.wifi.apName;
+            document.getElementById('wifi-pass').value = cfg.wifi.password || "";
+            document.getElementById('wifi-appass').value = cfg.wifi.apPassword || "";
 
             document.getElementById('tel-enabled').checked = cfg.telemetry.enabled;
             document.getElementById('tel-port').value = cfg.telemetry.port;
@@ -1022,6 +1026,14 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
                 })
                 .catch(() => showToast("Request failed", true));
         }
+
+        // Auto-connect if served directly from the ESP32
+        window.addEventListener('DOMContentLoaded', () => {
+            if (window.location.protocol.startsWith('http')) {
+                document.getElementById('device-ip').value = window.location.host;
+                connectToDevice();
+            }
+        });
     </script>
 </body>
 </html>

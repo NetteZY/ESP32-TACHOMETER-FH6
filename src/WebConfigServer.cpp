@@ -69,6 +69,8 @@ void WebConfigServer::handleGetConfig() {
     wifi["ssid"] = config.wifi.ssid;
     wifi["apMode"] = config.wifi.apMode;
     wifi["apName"] = config.wifi.apName;
+    wifi["password"] = (strlen(config.wifi.password) > 0) ? "••••••••" : "";
+    wifi["apPassword"] = (strlen(config.wifi.apPassword) > 0) ? "••••••••" : "";
 
     // Telemetry
     JsonObject telemetry = doc["telemetry"].to<JsonObject>();
@@ -113,10 +115,20 @@ void WebConfigServer::handleSaveConfig() {
     if (doc.containsKey("wifi")) {
         JsonObject wifi = doc["wifi"];
         if (wifi.containsKey("ssid")) strncpy(config.wifi.ssid, wifi["ssid"], sizeof(config.wifi.ssid) - 1);
-        if (wifi.containsKey("password")) strncpy(config.wifi.password, wifi["password"], sizeof(config.wifi.password) - 1);
+        if (wifi.containsKey("password")) {
+            const char* pass = wifi["password"];
+            if (strcmp(pass, "••••••••") != 0) {
+                strncpy(config.wifi.password, pass, sizeof(config.wifi.password) - 1);
+            }
+        }
         if (wifi.containsKey("apMode")) config.wifi.apMode = wifi["apMode"];
         if (wifi.containsKey("apName")) strncpy(config.wifi.apName, wifi["apName"], sizeof(config.wifi.apName) - 1);
-        if (wifi.containsKey("apPassword")) strncpy(config.wifi.apPassword, wifi["apPassword"], sizeof(config.wifi.apPassword) - 1);
+        if (wifi.containsKey("apPassword")) {
+            const char* apPass = wifi["apPassword"];
+            if (strcmp(apPass, "••••••••") != 0) {
+                strncpy(config.wifi.apPassword, apPass, sizeof(config.wifi.apPassword) - 1);
+            }
+        }
     }
 
     // Parse Telemetry settings
