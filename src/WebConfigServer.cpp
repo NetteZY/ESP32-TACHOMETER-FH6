@@ -2,6 +2,8 @@
 #include "html_index.h"
 #include <ArduinoJson.h>
 
+extern void restartTelemetry();
+
 WebConfigServer::WebConfigServer(ConfigManager& config, TelemetryData& telData, RpmShiftLightModule& shiftLight)
     : server(80), config(config), telData(telData), shiftLight(shiftLight) {
 }
@@ -132,12 +134,23 @@ void WebConfigServer::handleSaveConfig() {
     }
 
     // Parse Telemetry settings
+    bool telemetryChanged = false;
     if (doc.containsKey("telemetry")) {
         JsonObject tel = doc["telemetry"];
+        uint16_t oldPort = config.telemetry.port;
+        bool oldEnabled = config.telemetry.enabled;
+        uint8_t oldGameType = config.telemetry.gameType;
+
         if (tel.containsKey("port")) config.telemetry.port = tel["port"];
         if (tel.containsKey("enabled")) config.telemetry.enabled = tel["enabled"];
         if (tel.containsKey("gameType")) config.telemetry.gameType = tel["gameType"];
         if (tel.containsKey("pcIpAddress")) strncpy(config.telemetry.pcIpAddress, tel["pcIpAddress"], sizeof(config.telemetry.pcIpAddress) - 1);
+
+        if (config.telemetry.port != oldPort || 
+            config.telemetry.enabled != oldEnabled || 
+            config.telemetry.gameType != oldGameType) {
+            telemetryChanged = true;
+        }
     }
 
     // Parse Shift Light settings
@@ -159,6 +172,11 @@ void WebConfigServer::handleSaveConfig() {
     // If shift light settings were updated, reconfigure the running module instantly
     if (shiftLightChanged) {
         shiftLight.reconfigure(config.shiftLight);
+    }
+
+    // If telemetry settings changed, restart the listener dynamically
+    if (telemetryChanged) {
+        restartTelemetry();
     }
 
     sendCORS(200, "text/plain", "OK");

@@ -220,6 +220,15 @@ void setupTelemetry() {
     }
 }
 
+void restartTelemetry() {
+    Serial.println("Restarting telemetry UDP listener...");
+    udp.close();
+    isUdpConnected = false;
+    memset(&telData, 0, sizeof(telData));
+    telData.isUpdating = false;
+    setupTelemetry();
+}
+
 void setup() {
     Serial.begin(115200);
     delay(1000);
