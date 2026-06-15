@@ -858,6 +858,14 @@
             [0b00000000, 0b00000000, 0b00000000, 0b00111100, 0b00000000, 0b00000000, 0b00000000]
         ];
 
+        function toggleGameFields() {
+            const gameVal = parseInt(document.getElementById('tel-game').value) || 0;
+            const pcipField = document.getElementById('tel-pcip-field');
+            if (pcipField) {
+                pcipField.style.display = (gameVal === 3) ? 'block' : 'none';
+            }
+        }
+
         function toggleLedModeFields() {
             const mode = parseInt(document.getElementById('sl-mode').value) || 0;
             const numLedsGroup = document.getElementById('sl-numleds-group');
