@@ -1208,6 +1208,7 @@
                     startPolling();
                 })
                 .catch(err => {
+                    console.error("Connection error details:", err);
                     btn.textContent = "🔌 Connect to ESP32";
                     badge.textContent = "CONNECTION FAILED";
                     badge.className = "status-badge";
@@ -1221,24 +1222,24 @@
         function populateUI(cfg) {
             isApModeActive = !!cfg.isApMode;
 
-            document.getElementById('wifi-ssid').value = cfg.wifi.ssid || "";
-            document.getElementById('wifi-pass').value = cfg.wifi.password || "";
+            document.getElementById('wifi-ssid').value = cfg.wifi?.ssid || "";
+            document.getElementById('wifi-pass').value = cfg.wifi?.password || "";
 
-            document.getElementById('tel-enabled').checked = cfg.telemetry.enabled;
-            document.getElementById('tel-port').value = cfg.telemetry.port;
-            document.getElementById('tel-game').value = cfg.telemetry.gameType.toString();
-            document.getElementById('tel-pcip').value = cfg.telemetry.pcIpAddress || "192.168.1.100";
+            document.getElementById('tel-enabled').checked = !!cfg.telemetry?.enabled;
+            document.getElementById('tel-port').value = cfg.telemetry?.port !== undefined ? cfg.telemetry.port : 5300;
+            document.getElementById('tel-game').value = (cfg.telemetry?.gameType !== undefined ? cfg.telemetry.gameType : 0).toString();
+            document.getElementById('tel-pcip').value = cfg.telemetry?.pcIpAddress || "192.168.1.100";
 
-            document.getElementById('sl-enabled').checked = cfg.shiftLight.enabled;
-            document.getElementById('sl-pin').value = cfg.shiftLight.pin.toString();
-            document.getElementById('sl-numleds').value = cfg.shiftLight.numLeds;
-            document.getElementById('sl-startrpm').value = cfg.shiftLight.startRpmPercent;
-            document.getElementById('sl-endrpm').value = cfg.shiftLight.endRpmPercent;
-            document.getElementById('sl-bright').value = cfg.shiftLight.brightness;
-            document.getElementById('sl-scheme').value = cfg.shiftLight.colorScheme.toString();
+            document.getElementById('sl-enabled').checked = !!cfg.shiftLight?.enabled;
+            document.getElementById('sl-pin').value = (cfg.shiftLight?.pin !== undefined ? cfg.shiftLight.pin : 15).toString();
+            document.getElementById('sl-numleds').value = cfg.shiftLight?.numLeds !== undefined ? cfg.shiftLight.numLeds : 16;
+            document.getElementById('sl-startrpm').value = cfg.shiftLight?.startRpmPercent !== undefined ? cfg.shiftLight.startRpmPercent : 70;
+            document.getElementById('sl-endrpm').value = cfg.shiftLight?.endRpmPercent !== undefined ? cfg.shiftLight.endRpmPercent : 95;
+            document.getElementById('sl-bright').value = cfg.shiftLight?.brightness !== undefined ? cfg.shiftLight.brightness : 64;
+            document.getElementById('sl-scheme').value = (cfg.shiftLight?.colorScheme !== undefined ? cfg.shiftLight.colorScheme : 0).toString();
 
-            document.getElementById('sl-mode').value = (cfg.shiftLight.ledMode !== undefined ? cfg.shiftLight.ledMode : 0).toString();
-            document.getElementById('sl-serp').value = (cfg.shiftLight.matrixSerpentine !== undefined ? cfg.shiftLight.matrixSerpentine : false).toString();
+            document.getElementById('sl-mode').value = (cfg.shiftLight?.ledMode !== undefined ? cfg.shiftLight.ledMode : 0).toString();
+            document.getElementById('sl-serp').value = (cfg.shiftLight?.matrixSerpentine !== undefined ? cfg.shiftLight.matrixSerpentine : false).toString();
 
             matrixRows = Array(8).fill(2);
             if (cfg.shiftLight.ledMode === 1) {

@@ -1,6 +1,9 @@
 const { app, BrowserWindow } = require('electron');
 const path = require('path');
 
+// Disable Private Network Access (PNA) checks to allow connections to local IPs
+app.commandLine.appendSwitch('disable-features', 'BlockInsecurePrivateNetworkRequests,PrivateNetworkAccessRespectPreflightResults,PrivateNetworkAccessSendPreflights');
+
 function createWindow() {
   const win = new BrowserWindow({
     width: 1080,
