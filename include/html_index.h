@@ -728,12 +728,21 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
                         <div class="dash-card-title">Network Configuration</div>
                         <form id="wifi-form" onsubmit="saveConfig(event, 'wifi')">
                             <div class="form-group">
-                                <label for="wifi-ssid">WiFi SSID (Home Network Name)</label>
-                                <input type="text" id="wifi-ssid" placeholder="Home Network SSID" required>
+                                <label for="wifi-scan-select">Scan Nearby Wi-Fi Networks</label>
+                                <div style="display:flex; gap:0.5rem; align-items:center; margin-bottom:0.75rem;">
+                                    <select id="wifi-scan-select" style="flex:1;" onchange="selectWifiNetwork()">
+                                        <option value="">-- Click scan to search --</option>
+                                    </select>
+                                    <button type="button" class="btn btn-secondary" id="btn-wifi-scan" onclick="scanWifiNetworks()" style="padding:0.55rem 1rem; white-space:nowrap; margin-bottom:0;">🔍 Scan</button>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="wifi-ssid">WiFi SSID (Network Name)</label>
+                                <input type="text" id="wifi-ssid" placeholder="Selected Network SSID" required>
                             </div>
                             <div class="form-group">
                                 <label for="wifi-pass">WiFi Password</label>
-                                <input type="password" id="wifi-pass" placeholder="Enter WiFi password">
+                                <input type="password" id="wifi-pass" placeholder="Enter password (leave empty if open)">
                             </div>
                             <button type="submit" class="btn btn-primary">Save Wi-Fi Settings & Connect</button>
                         </form>
@@ -1272,6 +1281,7 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
                 document.getElementById('wifi-form').parentElement.style.maxWidth = '600px';
                 if (wifiCardTitle) wifiCardTitle.textContent = "Initial Wi-Fi Connection Setup";
                 showToast("Device is in Setup Mode. Please configure home Wi-Fi credentials.", false);
+                setTimeout(scanWifiNetworks, 500);
             } else {
                 if (nav) nav.style.display = 'flex';
                 if (wifiCardTitle) wifiCardTitle.textContent = "Network Configuration";
@@ -1436,11 +1446,107 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
                 .catch(() => showToast("Request failed", true));
         }
 
+        function scanWifiNetworks() {
+            const select = document.getElementById('wifi-scan-select');
+            const btn = document.getElementById('btn-wifi-scan');
+            if (!select || !btn) return;
+            
+            btn.textContent = "Scanning...";
+            btn.disabled = true;
+            select.innerHTML = '<option value="">Scanning for networks...</option>';
+            
+            fetch(`${deviceIp}/api/scan_wifi`)
+                .then(res => {
+                    if (!res.ok) throw new Error("Scan failed");
+                    return res.json();
+                })
+                .then(networks => {
+                    select.innerHTML = '<option value="">-- Select network --</option>';
+                    if (networks.length === 0) {
+                        select.innerHTML = '<option value="">No networks found</option>';
+                    } else {
+                        networks.sort((a, b) => b.rssi - a.rssi);
+                        networks.forEach(net => {
+                            if (!net.ssid) return;
+                            const option = document.createElement('option');
+                            option.value = net.ssid;
+                            const strength = getSignalStrengthText(net.rssi);
+                            const secure = net.secure ? "🔒" : "🔓";
+                            option.textContent = `${net.ssid} (${strength} ${secure})`;
+                            option.dataset.secure = net.secure ? "true" : "false";
+                            select.appendChild(option);
+                        });
+                    }
+                    btn.textContent = "🔍 Scan";
+                    btn.disabled = false;
+                })
+                .catch(err => {
+                    select.innerHTML = '<option value="">Failed to scan</option>';
+                    btn.textContent = "🔍 Scan";
+                    btn.disabled = false;
+                    showToast("Failed to scan WiFi networks", true);
+                });
+        }
+
+        function getSignalStrengthText(rssi) {
+            if (rssi >= -50) return "Excellent";
+            if (rssi >= -65) return "Good";
+            if (rssi >= -80) return "Fair";
+            return "Weak";
+        }
+
+        function selectWifiNetwork() {
+            const select = document.getElementById('wifi-scan-select');
+            const ssidInput = document.getElementById('wifi-ssid');
+            const passInput = document.getElementById('wifi-pass');
+            if (!select || !ssidInput || !passInput) return;
+            
+            const selectedOption = select.options[select.selectedIndex];
+            if (!selectedOption || !selectedOption.value) return;
+            
+            ssidInput.value = selectedOption.value;
+            
+            if (selectedOption.dataset.secure === "true") {
+                passInput.value = "";
+                passInput.focus();
+            } else {
+                passInput.value = "";
+            }
+        }
+
         // Auto-connect if served directly from the ESP32
         window.addEventListener('DOMContentLoaded', () => {
-            if (window.location.protocol.startsWith('http')) {
-                document.getElementById('device-ip').value = window.location.host;
-                connectToDevice();
+            const isLocalFile = window.location.protocol === 'file:' || 
+                                window.location.hostname === '' || 
+                                window.location.hostname === 'localhost' ||
+                                window.location.hostname === '127.0.0.1';
+            const isRemotePage = window.location.hostname.includes('github.io') || 
+                                 window.location.hostname.includes('github.com');
+            
+            if (!isLocalFile && !isRemotePage) {
+                // Served from the ESP32! Hide connection UI card immediately
+                document.getElementById('connection-card').style.display = 'none';
+                document.getElementById('config-panel').style.display = 'block';
+                deviceIp = ""; // Use relative paths to completely bypass CORS / PNA
+                
+                fetch('/api/config')
+                    .then(res => {
+                        if (!res.ok) throw new Error("Connection failed");
+                        return res.json();
+                    })
+                    .then(cfg => {
+                        populateUI(cfg);
+                        const badge = document.getElementById('connection-badge');
+                        badge.textContent = "CONNECTED (LOCAL)";
+                        badge.className = "status-badge connected";
+                        startPolling();
+                    })
+                    .catch(err => {
+                        showToast("Failed to load configuration from device", true);
+                    });
+            } else {
+                // Configurator opened locally as file or on GitHub Pages
+                document.getElementById('device-ip').value = "192.168.4.1";
             }
         });
     </script>

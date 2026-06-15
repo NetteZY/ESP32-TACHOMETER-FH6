@@ -16,6 +16,7 @@ void WebConfigServer::begin() {
     server.on("/api/config", HTTP_GET, std::bind(&WebConfigServer::handleGetConfig, this));
     server.on("/api/save", HTTP_POST, std::bind(&WebConfigServer::handleSaveConfig, this));
     server.on("/api/test_leds", HTTP_GET, std::bind(&WebConfigServer::handleTestLeds, this));
+    server.on("/api/scan_wifi", HTTP_GET, std::bind(&WebConfigServer::handleScanWifi, this));
     server.on("/api/reboot", HTTP_POST, std::bind(&WebConfigServer::handleReboot, this));
     server.on("/api/reset", HTTP_POST, std::bind(&WebConfigServer::handleReset, this));
     
@@ -24,6 +25,7 @@ void WebConfigServer::begin() {
     server.on("/api/config", HTTP_OPTIONS, std::bind(&WebConfigServer::handleOptions, this));
     server.on("/api/save", HTTP_OPTIONS, std::bind(&WebConfigServer::handleOptions, this));
     server.on("/api/test_leds", HTTP_OPTIONS, std::bind(&WebConfigServer::handleOptions, this));
+    server.on("/api/scan_wifi", HTTP_OPTIONS, std::bind(&WebConfigServer::handleOptions, this));
     server.on("/api/reboot", HTTP_OPTIONS, std::bind(&WebConfigServer::handleOptions, this));
     server.on("/api/reset", HTTP_OPTIONS, std::bind(&WebConfigServer::handleOptions, this));
     
@@ -240,4 +242,24 @@ void WebConfigServer::sendCORS(int code, const String& contentType, const String
 
 void WebConfigServer::sendJSON(int code, const String& json) {
     sendCORS(code, "application/json", json);
+}
+
+void WebConfigServer::handleScanWifi() {
+    int n = WiFi.scanNetworks();
+    JsonDocument doc;
+    JsonArray arr = doc.to<JsonArray>();
+    
+    int limit = std::min(n, 15);
+    for (int i = 0; i < limit; i++) {
+        JsonObject net = arr.add<JsonObject>();
+        net["ssid"] = WiFi.SSID(i);
+        net["rssi"] = WiFi.RSSI(i);
+        net["secure"] = (WiFi.encryptionType(i) != WIFI_AUTH_OPEN);
+    }
+    
+    WiFi.scanDelete();
+
+    String response;
+    serializeJson(doc, response);
+    sendJSON(200, response);
 }

@@ -26,6 +26,7 @@ private:
     void handleGetConfig();
     void handleSaveConfig();
     void handleTestLeds();
+    void handleScanWifi();
     void handleReboot();
     void handleReset();
     void handleNotFound();
