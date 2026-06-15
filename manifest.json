@@ -1,12 +1,12 @@
 {
   "name": "SimDash ESP32 Tachometer",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "home_page_url": "https://github.com/NetteZY/ESP32-TACHOMETER-FH6",
   "builds": [
     {
       "chipFamily": "ESP32",
       "parts": [
-        { "path": "https://github.com/NetteZY/ESP32-TACHOMETER-FH6/releases/download/v1.1.1/merged-firmware.bin", "offset": 0 }
+        { "path": "https://github.com/NetteZY/ESP32-TACHOMETER-FH6/releases/download/v1.1.2/merged-firmware.bin", "offset": 0 }
       ]
     }
   ]

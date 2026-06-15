@@ -9,6 +9,9 @@ WebConfigServer::WebConfigServer(ConfigManager& config, TelemetryData& telData, 
 }
 
 void WebConfigServer::begin() {
+    const char* headerkeys[] = {"Origin", "Access-Control-Request-Headers"};
+    server.collectHeaders(headerkeys, 2);
+
     server.on("/", HTTP_GET, std::bind(&WebConfigServer::handleRoot, this));
     
     // API GET/POST handlers
@@ -217,9 +220,18 @@ void WebConfigServer::handleReset() {
 }
 
 void WebConfigServer::handleOptions() {
-    server.sendHeader("Access-Control-Allow-Origin", "*");
+    String origin = server.header("Origin");
+    if (origin.length() == 0) {
+        origin = "*";
+    }
+    server.sendHeader("Access-Control-Allow-Origin", origin);
     server.sendHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-    server.sendHeader("Access-Control-Allow-Headers", "Content-Type");
+    
+    String reqHeaders = server.header("Access-Control-Request-Headers");
+    if (reqHeaders.length() == 0) {
+        reqHeaders = "Content-Type";
+    }
+    server.sendHeader("Access-Control-Allow-Headers", reqHeaders);
     server.sendHeader("Access-Control-Allow-Private-Network", "true");
     server.send(204);
 }
@@ -233,9 +245,18 @@ void WebConfigServer::handleNotFound() {
 }
 
 void WebConfigServer::sendCORS(int code, const String& contentType, const String& content) {
-    server.sendHeader("Access-Control-Allow-Origin", "*");
+    String origin = server.header("Origin");
+    if (origin.length() == 0) {
+        origin = "*";
+    }
+    server.sendHeader("Access-Control-Allow-Origin", origin);
     server.sendHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-    server.sendHeader("Access-Control-Allow-Headers", "Content-Type");
+    
+    String reqHeaders = server.header("Access-Control-Request-Headers");
+    if (reqHeaders.length() == 0) {
+        reqHeaders = "Content-Type";
+    }
+    server.sendHeader("Access-Control-Allow-Headers", reqHeaders);
     server.sendHeader("Access-Control-Allow-Private-Network", "true");
     server.send(code, contentType, content);
 }
