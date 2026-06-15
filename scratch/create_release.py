@@ -8,7 +8,7 @@ import sys
 def create_github_release():
     owner = "NetteZY"
     repo = "ESP32-TACHOMETER-FH6"
-    tag = "v1.1.0"
+    tag = "v1.1.1"
     
     # Read token
     token_path = "/home/kuraaku/ESP32-TELE/token"
@@ -22,14 +22,14 @@ def create_github_release():
     if not token:
         print("Error: Token is empty")
         sys.exit(1)
-
+ 
     headers = {
         "Authorization": f"Bearer {token}",
         "Accept": "application/vnd.github+json",
         "X-GitHub-Api-Version": "2022-11-28",
         "User-Agent": "Python-urllib"
     }
-
+ 
     # Step 1: Check if release already exists and delete it
     print(f"Checking if release {tag} exists...")
     check_url = f"https://api.github.com/repos/{owner}/{repo}/releases/tags/{tag}"
@@ -56,7 +56,7 @@ def create_github_release():
                 print("Release deleted successfully.")
         except Exception as e:
             print(f"Warning: Failed to delete release: {e}")
-
+ 
         # Delete tag ref
         delete_tag_url = f"https://api.github.com/repos/{owner}/{repo}/git/refs/tags/{tag}"
         delete_tag_req = urllib.request.Request(delete_tag_url, headers=headers, method="DELETE")
@@ -65,7 +65,7 @@ def create_github_release():
                 print("Tag reference deleted successfully.")
         except Exception as e:
             print(f"Warning: Failed to delete tag reference: {e}")
-
+ 
     # Step 2: Create a new release
     print(f"Creating new GitHub release {tag}...")
     create_url = f"https://api.github.com/repos/{owner}/{repo}/releases"
@@ -73,7 +73,7 @@ def create_github_release():
         "tag_name": tag,
         "target_commitish": "main",
         "name": tag,
-        "body": "Version 1.1.0 Release: Configurable 8x8 LED Matrix & Simplified WiFi Configuration\n\n### New Features:\n- **8x8 Matrix Mode**: Drive an 8x8 NeoPixel matrix. Map shift lights dynamically to any row(s) and display a real-time centered gear indicator ('R', 'N', '1'-'9') on the remaining rows.\n- **Matrix Layout Customization**: Supports both Progressive and Serpentine grid routing layouts.\n- **Interactive Web Row Mapper**: Custom row layout editor directly inside the Web Configurator UI with contiguous zone validation.\n- **Simplified WiFi AP Setup**: Removed permanent AP mode configurations. WiFi AP now runs as a fallback with a simplified, single-purpose setup interface (no other settings accessible until connected to Client Wi-Fi).\n- **CORS Support**: CORS enabled for remote configurators (like `web-tool.html`).\n\n### Included Assets:\n- `merged-firmware.bin`: Unified flash binary (burn at offset 0x0).\n- `firmware.bin`: App application binary (PlatformIO upload at offset 0x10000).\n- `bootloader.bin` & `partitions.bin`.",
+        "body": "Version 1.1.1 Release: Dedicated Setup Portal & Flash Size Optimization\n\n### New Features:\n- **Dedicated Setup Portal**: Replaced the embedded firmware web server root with a dedicated, lightweight, and offline-ready WiFi Setup Portal. No remote configurator or dashboard remnants are served from the device, resolving setup connection prompts.\n- **Advanced PC Configuration**: Advanced features (LED matrix mapping, telemetry ports, etc.) are now configured using the local `web-tool.html` on your PC, connecting directly to the ESP32's client IP.\n- **Flash Memory Optimization**: Hiding the heavy dashboard page saved ~41 KB of flash memory (firmware size reduced from 68.0% to 64.9%).\n\n### Included Assets:\n- `merged-firmware.bin`: Unified flash binary (burn at offset 0x0).\n- `firmware.bin`: App application binary (PlatformIO upload at offset 0x10000).\n- `bootloader.bin` & `partitions.bin`.",
         "draft": False,
         "prerelease": False
     }

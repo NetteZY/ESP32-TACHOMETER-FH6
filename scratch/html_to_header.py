@@ -3,7 +3,7 @@ import os
 
 def main():
     root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    html_path = os.path.join(root_dir, "web-tool.html")
+    html_path = os.path.join(root_dir, "setup-portal.html")
     header_path = os.path.join(root_dir, "include", "html_index.h")
 
     if not os.path.exists(html_path):
