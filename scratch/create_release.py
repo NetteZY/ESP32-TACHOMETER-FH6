@@ -73,7 +73,7 @@ def create_github_release():
         "tag_name": tag,
         "target_commitish": "main",
         "name": tag,
-        "body": "Version 1.1.3 Release: Standalone Windows Executable & Auto-Build CI\n\n### Changes:\n- **Standalone Windows Executable**: Bundled `web-tool.html` directly into `configurator-app` and configured `electron-builder` for offline packaging.\n- **GitHub Actions Auto-Build**: Added a CI workflow that automatically builds the Windows `.exe` natively on a Windows VM and attaches it to the release assets.\n- **Self-Contained App**: Copied `web-tool.html` into the app directory so it has no parent folder dependency.\n\n### Included Assets:\n- `merged-firmware.bin`: Unified flash binary (burn at offset 0x0).\n- `firmware.bin`: App application binary (PlatformIO upload at offset 0x10000).\n- `bootloader.bin` & `partitions.bin`.\n- `SimDash-Configurator.exe` (built and attached automatically by GitHub Actions).",
+        "body": "Version 1.1.3 Release: Bug Fixes & Refinements\n\n### Changes:\n- **Web Tool Fixes**: Fixed `showTab` undefined reference and added diagnostic logging to the web configuration tool.\n- **PNA Restrictions**: Bypassed Chromium Private Network Access (PNA) restrictions for direct connections.\n- **Defensive Parsing**: Added defensive optional chaining to the JSON config parsing.\n\n### Included Assets:\n- `merged-firmware.bin`: Unified flash binary (burn at offset 0x0).\n- `firmware.bin`: App application binary (PlatformIO upload at offset 0x10000).\n- `bootloader.bin` & `partitions.bin`.",
         "draft": False,
         "prerelease": False
     }
