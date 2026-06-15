@@ -4,3 +4,4 @@ token
 *.bin
 *.elf
 *.o
+node_modules/

@@ -1,0 +1,12 @@
+{
+  "name": "simdash-configurator",
+  "version": "1.0.0",
+  "description": "Desktop Configurator for SimDash ESP32 Tachometer",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "devDependencies": {
+    "electron": "^28.2.0"
+  }
+}
