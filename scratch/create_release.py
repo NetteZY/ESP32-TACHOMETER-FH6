@@ -8,7 +8,7 @@ import sys
 def create_github_release():
     owner = "NetteZY"
     repo = "ESP32-TACHOMETER-FH6"
-    tag = "v1.1.2"
+    tag = "v1.1.3"
     
     # Read token
     token_path = "/home/kuraaku/ESP32-TELE/token"
@@ -73,7 +73,7 @@ def create_github_release():
         "tag_name": tag,
         "target_commitish": "main",
         "name": tag,
-        "body": "Version 1.1.2 Release: CORS & PNA Connection Fixes for Local PC Configurators\n\n### Changes:\n- **Dynamic CORS Origin Echoing**: Modified `WebConfigServer` to read and dynamically reflect the requesting client's `Origin` header. This resolves CORS blocks when `web-tool.html` is run locally from `file://` (which sends origin `null`) or on localhost.\n- **Dynamic Request Headers Echoing**: Allowed dynamic mapping of `Access-Control-Request-Headers` in OPTIONS preflights.\n- **Local Configurator Initialization**: Added page load initializer in `web-tool.html` to generate DOM elements before connection is established.\n\n### Included Assets:\n- `merged-firmware.bin`: Unified flash binary (burn at offset 0x0).\n- `firmware.bin`: App application binary (PlatformIO upload at offset 0x10000).\n- `bootloader.bin` & `partitions.bin`.",
+        "body": "Version 1.1.3 Release: Standalone Windows Executable & Auto-Build CI\n\n### Changes:\n- **Standalone Windows Executable**: Bundled `web-tool.html` directly into `configurator-app` and configured `electron-builder` for offline packaging.\n- **GitHub Actions Auto-Build**: Added a CI workflow that automatically builds the Windows `.exe` natively on a Windows VM and attaches it to the release assets.\n- **Self-Contained App**: Copied `web-tool.html` into the app directory so it has no parent folder dependency.\n\n### Included Assets:\n- `merged-firmware.bin`: Unified flash binary (burn at offset 0x0).\n- `firmware.bin`: App application binary (PlatformIO upload at offset 0x10000).\n- `bootloader.bin` & `partitions.bin`.\n- `SimDash-Configurator.exe` (built and attached automatically by GitHub Actions).",
         "draft": False,
         "prerelease": False
     }

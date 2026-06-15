@@ -4,9 +4,25 @@
   "description": "Desktop Configurator for SimDash ESP32 Tachometer",
   "main": "main.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "dist": "electron-builder"
   },
   "devDependencies": {
-    "electron": "^28.2.0"
+    "electron": "^28.2.0",
+    "electron-builder": "^24.9.1"
+  },
+  "build": {
+    "appId": "com.nettezy.simdash-configurator",
+    "win": {
+      "target": "portable"
+    },
+    "files": [
+      "main.js",
+      "package.json",
+      "web-tool.html"
+    ],
+    "directories": {
+      "output": "dist"
+    }
   }
 }

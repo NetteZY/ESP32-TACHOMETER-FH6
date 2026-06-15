@@ -17,7 +17,7 @@ function createWindow() {
   });
 
   // Load the web-tool.html file from the parent directory
-  win.loadFile(path.join(__dirname, '../web-tool.html'));
+  win.loadFile(path.join(__dirname, 'web-tool.html'));
 
   // Remove the default menu bar
   win.setMenu(null);
