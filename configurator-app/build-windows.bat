@@ -1,4 +1,5 @@
 @echo off
+cd /d "%~dp0"
 title SimDash Configurator Windows Builder
 echo ===================================================
 echo   SimDash Configurator Standalone Executable Builder
