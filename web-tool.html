@@ -795,6 +795,10 @@
     <div id="toast" class="toast">Settings updated successfully!</div>
 
     <script>
+        console.log("--- SimDash Web Configurator Initializing ---");
+        console.log("File path: web-tool.html (Root)");
+        console.log("Verify toggleGameFields function exists in scope at startup:", typeof toggleGameFields);
+
         let deviceIp = "";
         let pollTimer = null;
         let ledCount = 16;
@@ -1206,6 +1210,7 @@
                     return res.json();
                 })
                 .then(cfg => {
+                    console.log("API Config fetched successfully from device:", cfg);
                     populateUI(cfg);
                     document.getElementById('config-panel').style.display = 'block';
                     document.getElementById('connection-card').style.display = 'none';
@@ -1228,6 +1233,8 @@
         }
 
         function populateUI(cfg) {
+            console.log("populateUI() invoked. config =", cfg);
+            console.log("Verify toggleGameFields function exists in scope during populateUI:", typeof toggleGameFields);
             isApModeActive = !!cfg.isApMode;
 
             document.getElementById('wifi-ssid').value = cfg.wifi?.ssid || "";
