@@ -73,7 +73,7 @@ def create_github_release():
         "tag_name": tag,
         "target_commitish": "main",
         "name": tag,
-        "body": "Initial Release of the SimDash-like ESP32 Tachometer Firmware.\n\nIncluded Assets:\n- `merged-firmware.bin`: Full flash binary (burn at offset 0x0) with CORS support enabled.\n- `firmware.bin`: App binary (PlatformIO upload at offset 0x10000)\n- `bootloader.bin` & `partitions.bin`",
+        "body": "Version 1.1.0 Release: Configurable 8x8 LED Matrix & Simplified WiFi Configuration\n\n### New Features:\n- **8x8 Matrix Mode**: Drive an 8x8 NeoPixel matrix. Map shift lights dynamically to any row(s) and display a real-time centered gear indicator ('R', 'N', '1'-'9') on the remaining rows.\n- **Matrix Layout Customization**: Supports both Progressive and Serpentine grid routing layouts.\n- **Interactive Web Row Mapper**: Custom row layout editor directly inside the Web Configurator UI with contiguous zone validation.\n- **Simplified WiFi AP Setup**: Removed permanent AP mode configurations. WiFi AP now runs as a fallback with a simplified, single-purpose setup interface (no other settings accessible until connected to Client Wi-Fi).\n- **CORS Support**: CORS enabled for remote configurators (like `web-tool.html`).\n\n### Included Assets:\n- `merged-firmware.bin`: Unified flash binary (burn at offset 0x0).\n- `firmware.bin`: App application binary (PlatformIO upload at offset 0x10000).\n- `bootloader.bin` & `partitions.bin`.",
         "draft": False,
         "prerelease": False
     }
