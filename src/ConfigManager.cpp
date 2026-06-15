@@ -17,9 +17,6 @@ void ConfigManager::load() {
     // WiFi config
     preferences.getBytes("wifi_ssid", wifi.ssid, sizeof(wifi.ssid));
     preferences.getBytes("wifi_pass", wifi.password, sizeof(wifi.password));
-    wifi.apMode = preferences.getBool("wifi_ap", wifi.apMode);
-    preferences.getBytes("wifi_apname", wifi.apName, sizeof(wifi.apName));
-    preferences.getBytes("wifi_appass", wifi.apPassword, sizeof(wifi.apPassword));
 
     // Telemetry config
     telemetry.port = preferences.getUShort("tel_port", telemetry.port);
@@ -35,15 +32,18 @@ void ConfigManager::load() {
     shiftLight.endRpmPercent = preferences.getFloat("sl_endrpm", shiftLight.endRpmPercent);
     shiftLight.brightness = preferences.getUChar("sl_bright", shiftLight.brightness);
     shiftLight.colorScheme = preferences.getUChar("sl_scheme", shiftLight.colorScheme);
+    shiftLight.ledMode = preferences.getUChar("sl_mode", shiftLight.ledMode);
+    shiftLight.matrixSerpentine = preferences.getBool("sl_serp", shiftLight.matrixSerpentine);
+    shiftLight.matrixStartRow = preferences.getUChar("sl_mstart", shiftLight.matrixStartRow);
+    shiftLight.matrixRowCount = preferences.getUChar("sl_mrows", shiftLight.matrixRowCount);
+    shiftLight.gearStartRow = preferences.getUChar("sl_gstart", shiftLight.gearStartRow);
+    shiftLight.gearRowCount = preferences.getUChar("sl_grows", shiftLight.gearRowCount);
 }
 
 void ConfigManager::save() {
     // WiFi config
     preferences.putBytes("wifi_ssid", wifi.ssid, sizeof(wifi.ssid));
     preferences.putBytes("wifi_pass", wifi.password, sizeof(wifi.password));
-    preferences.putBool("wifi_ap", wifi.apMode);
-    preferences.putBytes("wifi_apname", wifi.apName, sizeof(wifi.apName));
-    preferences.putBytes("wifi_appass", wifi.apPassword, sizeof(wifi.apPassword));
 
     // Telemetry config
     preferences.putUShort("tel_port", telemetry.port);
@@ -59,6 +59,12 @@ void ConfigManager::save() {
     preferences.putFloat("sl_endrpm", shiftLight.endRpmPercent);
     preferences.putUChar("sl_bright", shiftLight.brightness);
     preferences.putUChar("sl_scheme", shiftLight.colorScheme);
+    preferences.putUChar("sl_mode", shiftLight.ledMode);
+    preferences.putBool("sl_serp", shiftLight.matrixSerpentine);
+    preferences.putUChar("sl_mstart", shiftLight.matrixStartRow);
+    preferences.putUChar("sl_mrows", shiftLight.matrixRowCount);
+    preferences.putUChar("sl_gstart", shiftLight.gearStartRow);
+    preferences.putUChar("sl_grows", shiftLight.gearRowCount);
 }
 
 void ConfigManager::reset() {
@@ -66,9 +72,6 @@ void ConfigManager::reset() {
     memset(&wifi, 0, sizeof(wifi));
     strncpy(wifi.ssid, "", sizeof(wifi.ssid) - 1);
     strncpy(wifi.password, "", sizeof(wifi.password) - 1);
-    wifi.apMode = true;
-    strncpy(wifi.apName, "SimDash-ESP32-AP", sizeof(wifi.apName) - 1);
-    strncpy(wifi.apPassword, "", sizeof(wifi.apPassword) - 1);
 
     telemetry.port = 5300;
     telemetry.enabled = true;
@@ -82,4 +85,10 @@ void ConfigManager::reset() {
     shiftLight.endRpmPercent = 95.0f;
     shiftLight.brightness = 64;
     shiftLight.colorScheme = 0;
+    shiftLight.ledMode = 0;
+    shiftLight.matrixSerpentine = false;
+    shiftLight.matrixStartRow = 0;
+    shiftLight.matrixRowCount = 1;
+    shiftLight.gearStartRow = 1;
+    shiftLight.gearRowCount = 7;
 }

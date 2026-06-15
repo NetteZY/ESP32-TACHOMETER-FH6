@@ -21,8 +21,7 @@ bool isUdpConnected = false;
 
 // Connect to WiFi or initialize Access Point
 void setupWiFi() {
-    // If WiFi credentials are set and AP mode is false, try connecting
-    if (strlen(config.wifi.ssid) > 0 && !config.wifi.apMode) {
+    if (strlen(config.wifi.ssid) > 0) {
         Serial.printf("Connecting to Wi-Fi: %s\n", config.wifi.ssid);
         WiFi.mode(WIFI_STA);
         WiFi.begin(config.wifi.ssid, config.wifi.password);
@@ -46,16 +45,11 @@ void setupWiFi() {
 
     // Access Point Mode fallback
     WiFi.mode(WIFI_AP);
-    bool apCreated = false;
-    if (strlen(config.wifi.apPassword) >= 8) {
-        apCreated = WiFi.softAP(config.wifi.apName, config.wifi.apPassword);
-    } else {
-        apCreated = WiFi.softAP(config.wifi.apName); // Open network
-    }
+    bool apCreated = WiFi.softAP("SimDash-ESP32-AP");
 
     if (apCreated) {
         Serial.printf("Access Point created successfully!\n");
-        Serial.printf("SSID: %s\n", config.wifi.apName);
+        Serial.printf("SSID: SimDash-ESP32-AP\n");
         Serial.printf("IP Address: %s\n", WiFi.softAPIP().toString().c_str());
     } else {
         Serial.println("Failed to start Access Point.");

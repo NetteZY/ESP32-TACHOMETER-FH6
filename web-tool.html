@@ -422,6 +422,19 @@
             border: 1px solid var(--border-color);
         }
 
+        .led-preview-matrix {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 6px;
+            background-color: #0b0f19;
+            padding: 10px;
+            border-radius: 8px;
+            margin: 0 auto 1.25rem auto;
+            border: 1px solid var(--border-color);
+            width: min(100%, 260px);
+            aspect-ratio: 1;
+        }
+
         .led-node {
             flex: 1;
             height: 12px;
@@ -429,6 +442,52 @@
             background-color: #1e293b;
             box-shadow: inset 0 1px 3px rgba(0,0,0,0.5);
             transition: all 0.1s;
+        }
+
+        .led-node-matrix {
+            aspect-ratio: 1;
+            border-radius: 50%;
+            background-color: #1e293b;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.5);
+            transition: all 0.1s;
+        }
+
+        .btn-group-sm {
+            display: flex;
+            gap: 2px;
+            background: rgba(0,0,0,0.2);
+            padding: 2px;
+            border-radius: 6px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .btn-mapper {
+            padding: 4px 10px;
+            font-size: 0.8rem;
+            border-radius: 4px;
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .btn-mapper.active-shift {
+            background-color: var(--accent-green);
+            color: #fff;
+            box-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn-mapper.active-gear {
+            background-color: var(--accent-cyan);
+            color: #fff;
+            box-shadow: 0 0 8px rgba(6, 182, 212, 0.4);
+        }
+
+        .btn-mapper.active-off {
+            background-color: #334155;
+            color: var(--text-primary);
         }
 
         .toast {
@@ -587,8 +646,37 @@
                         </div>
 
                         <div class="form-group">
+                            <label for="sl-mode">Display Mode</label>
+                            <select id="sl-mode" onchange="toggleLedModeFields(); drawLedPreview();">
+                                <option value="0">Linear Strip</option>
+                                <option value="1">8x8 Matrix</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group" id="sl-numleds-group">
                             <label for="sl-numleds">Number of LEDs</label>
                             <input type="number" id="sl-numleds" min="1" max="64" onchange="drawLedPreview()">
+                        </div>
+
+                        <div class="form-group" id="sl-serp-group" style="display:none;">
+                            <label for="sl-serp">Matrix Layout Style</label>
+                            <select id="sl-serp">
+                                <option value="false">Progressive Grid</option>
+                                <option value="true">Serpentine Grid</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div id="sl-matrix-mapper" class="dash-card" style="display:none; margin-top:1.5rem; margin-bottom:1.5rem; border:1px solid rgba(255,255,255,0.08); background:rgba(30,41,59,0.2);">
+                        <div class="dash-card-title" style="margin-bottom:0.4rem; font-size:0.95rem;">Interactive Matrix Row Mapper</div>
+                        <div style="font-size:0.8rem; color:var(--text-secondary); margin-bottom:1rem;">
+                            Assign rows for Shift Lights (contiguous green/red zones), Gear Display (contiguous cyan zone), or turn them Off.
+                        </div>
+                        <div id="sl-matrix-warning" style="display:none; color:var(--accent-orange); font-size:0.85rem; margin-bottom:1rem; padding:0.5rem; background:rgba(249,115,22,0.1); border-radius:6px; border:1px solid rgba(249,115,22,0.2);">
+                            ⚠️ Shift and Gear zones cannot overlap or have gaps.
+                        </div>
+                        <div style="display:flex; flex-direction:column; gap:0.5rem;" id="matrix-rows-container">
+                            <!-- Injected dynamically by JS -->
                         </div>
                     </div>
 
@@ -635,41 +723,15 @@
                     <div class="dash-card">
                         <div class="dash-card-title">Network Configuration</div>
                         <form id="wifi-form" onsubmit="saveConfig(event, 'wifi')">
-                            
                             <div class="form-group">
-                                <label for="wifi-opmode">Wi-Fi Operation Mode</label>
-                                <select id="wifi-opmode" onchange="toggleWifiFields()">
-                                    <option value="client">Client Mode (Connect to Home Router)</option>
-                                    <option value="ap">Access Point Mode (Standalone Hotspot)</option>
-                                </select>
-                                <span style="font-size:0.8rem; color:var(--text-secondary);">
-                                    Select Client Mode to connect the device to your home network and assign it its own IP address.
-                                </span>
+                                <label for="wifi-ssid">WiFi SSID (Home Network Name)</label>
+                                <input type="text" id="wifi-ssid" placeholder="Home Network SSID" required>
                             </div>
-
-                            <div id="wifi-station-fields">
-                                <div class="form-group">
-                                    <label for="wifi-ssid">WiFi SSID (Home Network Name)</label>
-                                    <input type="text" id="wifi-ssid" placeholder="Home Network SSID">
-                                </div>
-                                <div class="form-group">
-                                    <label for="wifi-pass">WiFi Password</label>
-                                    <input type="password" id="wifi-pass" placeholder="Enter WiFi password">
-                                </div>
+                            <div class="form-group">
+                                <label for="wifi-pass">WiFi Password</label>
+                                <input type="password" id="wifi-pass" placeholder="Enter WiFi password">
                             </div>
-
-                            <div id="wifi-ap-fields" style="display:none;">
-                                <div class="form-group">
-                                    <label for="wifi-apname">AP Name (SSID broadcast)</label>
-                                    <input type="text" id="wifi-apname" placeholder="SimDash-ESP32-AP">
-                                </div>
-                                <div class="form-group">
-                                    <label for="wifi-appass">AP Password (WPA2)</label>
-                                    <input type="password" id="wifi-appass" placeholder="Leave empty for open network">
-                                </div>
-                            </div>
-
-                            <button type="submit" class="btn btn-primary">Save Wi-Fi Settings</button>
+                            <button type="submit" class="btn btn-primary">Save Wi-Fi Settings & Connect</button>
                         </form>
                     </div>
 
@@ -757,31 +819,208 @@
             simulateLedPreview();
         }
 
-        function toggleWifiFields() {
-            const opMode = document.getElementById('wifi-opmode').value;
-            const isAp = (opMode === 'ap');
-            document.getElementById('wifi-station-fields').style.display = isAp ? 'none' : 'block';
-            document.getElementById('wifi-ap-fields').style.display = isAp ? 'block' : 'none';
+        let isApModeActive = false;
+        let matrixRows = [0, 1, 1, 1, 1, 1, 1, 1]; // 0 = Shift, 1 = Gear, 2 = Off
+
+        const GEAR_BITMAPS = [
+            // 0: R
+            [0b01111100, 0b01100110, 0b01100110, 0b01111100, 0b01101100, 0b01100110, 0b01100110],
+            // 1: N
+            [0b01100110, 0b01110110, 0b01111110, 0b01101110, 0b01100110, 0b01100110, 0b01100110],
+            // 2: 1
+            [0b00011000, 0b00111000, 0b00011000, 0b00011000, 0b00011000, 0b00011000, 0b00111100],
+            // 3: 2
+            [0b00111100, 0b01100110, 0b00000110, 0b00011100, 0b00110000, 0b01100000, 0b01111110],
+            // 4: 3
+            [0b00111100, 0b01100110, 0b00000110, 0b00011100, 0b00000110, 0b01100110, 0b00111100],
+            // 5: 4
+            [0b00001100, 0b00011100, 0b00101100, 0b01001100, 0b01111110, 0b00001100, 0b00001100],
+            // 6: 5
+            [0b01111110, 0b01100000, 0b01111100, 0b00000110, 0b00000110, 0b01100110, 0b00111100],
+            // 7: 6
+            [0b00111100, 0b01100000, 0b01111100, 0b01100110, 0b01100110, 0b01100110, 0b00111100],
+            // 8: 7
+            [0b01111110, 0b00000110, 0b00001100, 0b00011000, 0b00110000, 0b01100000, 0b01100000],
+            // 9: 8
+            [0b00111100, 0b01100110, 0b01100110, 0b00111100, 0b01100110, 0b01100110, 0b00111100],
+            // 10: 9
+            [0b00111100, 0b01100110, 0b01100110, 0b00111110, 0b00000110, 0b01100110, 0b00111100],
+            // 11: - (dash)
+            [0b00000000, 0b00000000, 0b00000000, 0b00111100, 0b00000000, 0b00000000, 0b00000000]
+        ];
+
+        function toggleLedModeFields() {
+            const mode = parseInt(document.getElementById('sl-mode').value) || 0;
+            const numLedsGroup = document.getElementById('sl-numleds-group');
+            const serpGroup = document.getElementById('sl-serp-group');
+            const matrixMapper = document.getElementById('sl-matrix-mapper');
+            
+            if (mode === 0) {
+                numLedsGroup.style.display = 'block';
+                serpGroup.style.display = 'none';
+                matrixMapper.style.display = 'none';
+            } else {
+                numLedsGroup.style.display = 'none';
+                serpGroup.style.display = 'block';
+                matrixMapper.style.display = 'block';
+                document.getElementById('sl-numleds').value = 64;
+                renderRowMapper();
+            }
         }
 
-        function toggleGameFields() {
-            const gameType = document.getElementById('tel-game').value;
-            const isAssetto = (gameType === '3');
-            document.getElementById('tel-pcip-field').style.display = isAssetto ? 'block' : 'none';
+        function renderRowMapper() {
+            const container = document.getElementById('matrix-rows-container');
+            if (!container) return;
+            container.innerHTML = '';
+            
+            for (let i = 0; i < 8; i++) {
+                const item = document.createElement('div');
+                item.className = 'row-mapper-item';
+                item.style.cssText = 'display:flex; justify-content:space-between; align-items:center; padding:0.4rem 0.75rem; background:rgba(255,255,255,0.02); border-radius:6px; border:1px solid rgba(255,255,255,0.05);';
+                
+                const label = document.createElement('span');
+                label.textContent = 'Row ' + i;
+                label.style.cssText = 'font-weight:500; font-size:0.85rem; color:var(--text-primary);';
+                item.appendChild(label);
+                
+                const btnGroup = document.createElement('div');
+                btnGroup.className = 'btn-group-sm';
+                
+                const btnShift = document.createElement('button');
+                btnShift.type = 'button';
+                btnShift.className = 'btn-mapper' + (matrixRows[i] === 0 ? ' active-shift' : '');
+                btnShift.textContent = 'Shift';
+                btnShift.onclick = () => setRowType(i, 0);
+                btnGroup.appendChild(btnShift);
+                
+                const btnGear = document.createElement('button');
+                btnGear.type = 'button';
+                btnGear.className = 'btn-mapper' + (matrixRows[i] === 1 ? ' active-gear' : '');
+                btnGear.textContent = 'Gear';
+                btnGear.onclick = () => setRowType(i, 1);
+                btnGroup.appendChild(btnGear);
+                
+                const btnOff = document.createElement('button');
+                btnOff.type = 'button';
+                btnOff.className = 'btn-mapper' + (matrixRows[i] === 2 ? ' active-off' : '');
+                btnOff.textContent = 'Off';
+                btnOff.onclick = () => setRowType(i, 2);
+                btnGroup.appendChild(btnOff);
+                
+                item.appendChild(btnGroup);
+                container.appendChild(item);
+            }
+            
+            validateAndCalculateLayout();
+        }
+
+        function setRowType(rowIdx, type) {
+            matrixRows[rowIdx] = type;
+            renderRowMapper();
+            drawLedPreview();
+        }
+
+        function validateAndCalculateLayout() {
+            let shiftRows = [];
+            let gearRows = [];
+            for (let i = 0; i < 8; i++) {
+                if (matrixRows[i] === 0) shiftRows.push(i);
+                if (matrixRows[i] === 1) gearRows.push(i);
+            }
+            
+            let valid = true;
+            let msg = "";
+            
+            if (shiftRows.length > 0) {
+                let minS = Math.min(...shiftRows);
+                let maxS = Math.max(...shiftRows);
+                if (maxS - minS + 1 !== shiftRows.length) {
+                    valid = false;
+                    msg = "Shift light rows must be contiguous.";
+                }
+            }
+            
+            if (gearRows.length > 0) {
+                let minG = Math.min(...gearRows);
+                let maxG = Math.max(...gearRows);
+                if (maxG - minG + 1 !== gearRows.length) {
+                    valid = false;
+                    msg = "Gear display rows must be contiguous.";
+                }
+            }
+            
+            if (shiftRows.length > 0 && gearRows.length > 0) {
+                let minS = Math.min(...shiftRows);
+                let maxS = Math.max(...shiftRows);
+                let minG = Math.min(...gearRows);
+                let maxG = Math.max(...gearRows);
+                
+                if (minS <= maxG && maxS >= minG) {
+                    valid = false;
+                    msg = "Shift lights and Gear display zones cannot overlap.";
+                }
+            }
+            
+            const warningEl = document.getElementById('sl-matrix-warning');
+            const submitBtn = document.querySelector('#led-form button[type="submit"]');
+            
+            if (!valid) {
+                warningEl.style.display = 'block';
+                warningEl.textContent = "⚠️ " + msg;
+                if (submitBtn) submitBtn.disabled = true;
+            } else {
+                warningEl.style.display = 'none';
+                if (submitBtn) submitBtn.disabled = false;
+            }
+            
+            return valid;
         }
 
         function drawLedPreview() {
             const preview = document.getElementById('led-preview');
-            ledCount = parseInt(document.getElementById('sl-numleds').value) || 16;
+            const mode = parseInt(document.getElementById('sl-mode').value) || 0;
             
-            preview.innerHTML = '';
-            for (let i = 0; i < ledCount; i++) {
-                const node = document.createElement('div');
-                node.className = 'led-node';
-                node.id = 'preview-led-' + i;
-                preview.appendChild(node);
+            if (mode === 0) {
+                preview.className = 'led-preview-strip';
+                ledCount = parseInt(document.getElementById('sl-numleds').value) || 16;
+                preview.innerHTML = '';
+                for (let i = 0; i < ledCount; i++) {
+                    const node = document.createElement('div');
+                    node.className = 'led-node';
+                    node.id = 'preview-led-' + i;
+                    preview.appendChild(node);
+                }
+                simulateLedPreview(0.5);
+            } else {
+                preview.className = 'led-preview-matrix';
+                ledCount = 64;
+                preview.innerHTML = '';
+                for (let i = 0; i < ledCount; i++) {
+                    const node = document.createElement('div');
+                    node.className = 'led-node-matrix';
+                    node.id = 'preview-led-' + i;
+                    preview.appendChild(node);
+                }
+                highlightMatrixPreviewRows();
+                simulateLedPreview(0.5);
             }
-            simulateLedPreview(0.5);
+        }
+
+        function highlightMatrixPreviewRows() {
+            for (let i = 0; i < 8; i++) {
+                let type = matrixRows[i];
+                let borderStyle = '1px solid rgba(255,255,255,0.05)';
+                if (type === 0) borderStyle = '1px dashed rgba(16, 185, 129, 0.4)';
+                else if (type === 1) borderStyle = '1px dashed rgba(6, 182, 212, 0.4)';
+                
+                for (let x = 0; x < 8; x++) {
+                    let ledIdx = i * 8 + x;
+                    let led = document.getElementById('preview-led-' + ledIdx);
+                    if (led) {
+                        led.style.border = borderStyle;
+                    }
+                }
+            }
         }
 
         function getLedColor(index, count, scheme) {
@@ -799,21 +1038,127 @@
             }
         }
 
-        function simulateLedPreview(percent = 0.5) {
-            const scheme = parseInt(document.getElementById('sl-scheme').value);
-            const litCount = Math.round(percent * ledCount);
+        function drawVirtualGear(gear, startRow, rowCount, colorHex) {
+            if (rowCount === 0) return;
+            const bitmap = GEAR_BITMAPS[gear < 12 ? gear : 11];
+            
+            let bmpStartRow = 0;
+            let physStartRow = startRow;
+            let linesToDraw = rowCount;
 
-            for (let i = 0; i < ledCount; i++) {
-                const led = document.getElementById('preview-led-' + i);
-                if (!led) continue;
+            if (rowCount >= 7) {
+                physStartRow = startRow + Math.floor((rowCount - 7) / 2);
+                linesToDraw = 7;
+                bmpStartRow = 0;
+            } else {
+                bmpStartRow = Math.floor((7 - rowCount) / 2);
+                linesToDraw = rowCount;
+                physStartRow = startRow;
+            }
+
+            for (let y = 0; y < linesToDraw; y++) {
+                let rowByte = bitmap[bmpStartRow + y];
+                let physicalY = physStartRow + y;
+                if (physicalY < 0 || physicalY > 7) continue;
+
+                for (let x = 0; x < 8; x++) {
+                    let pixelOn = (rowByte & (0x80 >> x)) !== 0;
+                    if (pixelOn) {
+                        let idx = physicalY * 8 + x;
+                        let led = document.getElementById('preview-led-' + idx);
+                        if (led) {
+                            led.style.backgroundColor = colorHex;
+                            led.style.boxShadow = `0 0 10px ${colorHex}, inset 0 1px 2px rgba(255,255,255,0.4)`;
+                        }
+                    }
+                }
+            }
+        }
+
+        function simulateLedPreview(percent = 0.5, liveGear = 9) {
+            const mode = parseInt(document.getElementById('sl-mode').value) || 0;
+            const scheme = parseInt(document.getElementById('sl-scheme').value);
+            
+            if (mode === 0) {
+                const litCount = Math.round(percent * ledCount);
+                for (let i = 0; i < ledCount; i++) {
+                    const led = document.getElementById('preview-led-' + i);
+                    if (!led) continue;
+                    if (i < litCount) {
+                        const color = getLedColor(i, ledCount, scheme);
+                        led.style.backgroundColor = color;
+                        led.style.boxShadow = `0 0 10px ${color}, inset 0 1px 2px rgba(255,255,255,0.4)`;
+                    } else {
+                        led.style.backgroundColor = '#1e293b';
+                        led.style.boxShadow = 'inset 0 1px 3px rgba(0,0,0,0.5)';
+                    }
+                }
+            } else {
+                for (let i = 0; i < 64; i++) {
+                    const led = document.getElementById('preview-led-' + i);
+                    if (led) {
+                        led.style.backgroundColor = '#1e293b';
+                        led.style.boxShadow = 'inset 0 1px 3px rgba(0,0,0,0.5)';
+                    }
+                }
                 
-                if (i < litCount) {
-                    const color = getLedColor(i, ledCount, scheme);
-                    led.style.backgroundColor = color;
-                    led.style.boxShadow = `0 0 10px ${color}, inset 0 1px 2px rgba(255,255,255,0.4)`;
-                } else {
-                    led.style.backgroundColor = '#1e293b';
-                    led.style.boxShadow = 'inset 0 1px 3px rgba(0,0,0,0.5)';
+                highlightMatrixPreviewRows();
+
+                let shiftRows = [];
+                let gearRows = [];
+                for (let i = 0; i < 8; i++) {
+                    if (matrixRows[i] === 0) shiftRows.push(i);
+                    if (matrixRows[i] === 1) gearRows.push(i);
+                }
+
+                let matrixStartRow = shiftRows.length > 0 ? Math.min(...shiftRows) : 0;
+                let matrixRowCount = shiftRows.length;
+                let gearStartRow = gearRows.length > 0 ? Math.min(...gearRows) : 0;
+                let gearRowCount = gearRows.length;
+
+                let totalShiftLeds = matrixRowCount * 8;
+                let litCount = Math.round(percent * totalShiftLeds);
+
+                let flashColor = 'rgb(244, 63, 94)';
+                if (scheme === 1) flashColor = 'rgb(168, 85, 247)';
+                else if (scheme === 2) flashColor = '#ffffff';
+                
+                if (percent >= 1.0) {
+                    const isEven = Math.floor(Date.now() / 80) % 2 === 0;
+                    if (isEven) {
+                        for (let i = 0; i < totalShiftLeds; i++) {
+                            let row = matrixStartRow + Math.floor(i / 8);
+                            let col = i % 8;
+                            let idx = row * 8 + col;
+                            let led = document.getElementById('preview-led-' + idx);
+                            if (led) {
+                                led.style.backgroundColor = flashColor;
+                                led.style.boxShadow = `0 0 10px ${flashColor}, inset 0 1px 2px rgba(255,255,255,0.4)`;
+                            }
+                        }
+                        if (gearRowCount > 0) {
+                            drawVirtualGear(liveGear, gearStartRow, gearRowCount, flashColor);
+                        }
+                    }
+                    return;
+                }
+
+                for (let i = 0; i < totalShiftLeds; i++) {
+                    if (i < litCount) {
+                        let row = matrixStartRow + Math.floor(i / 8);
+                        let col = i % 8;
+                        let idx = row * 8 + col;
+                        let led = document.getElementById('preview-led-' + idx);
+                        if (led) {
+                            let color = getLedColor(i, totalShiftLeds, scheme);
+                            led.style.backgroundColor = color;
+                            led.style.boxShadow = `0 0 10px ${color}, inset 0 1px 2px rgba(255,255,255,0.4)`;
+                        }
+                    }
+                }
+
+                if (gearRowCount > 0) {
+                    drawVirtualGear(liveGear, gearStartRow, gearRowCount, '#00aaff');
                 }
             }
         }
@@ -865,11 +1210,10 @@
         }
 
         function populateUI(cfg) {
-            document.getElementById('wifi-ssid').value = cfg.wifi.ssid;
-            document.getElementById('wifi-opmode').value = cfg.wifi.apMode ? "ap" : "client";
-            document.getElementById('wifi-apname').value = cfg.wifi.apName;
+            isApModeActive = !!cfg.isApMode;
+
+            document.getElementById('wifi-ssid').value = cfg.wifi.ssid || "";
             document.getElementById('wifi-pass').value = cfg.wifi.password || "";
-            document.getElementById('wifi-appass').value = cfg.wifi.apPassword || "";
 
             document.getElementById('tel-enabled').checked = cfg.telemetry.enabled;
             document.getElementById('tel-port').value = cfg.telemetry.port;
@@ -884,12 +1228,53 @@
             document.getElementById('sl-bright').value = cfg.shiftLight.brightness;
             document.getElementById('sl-scheme').value = cfg.shiftLight.colorScheme.toString();
 
+            document.getElementById('sl-mode').value = (cfg.shiftLight.ledMode !== undefined ? cfg.shiftLight.ledMode : 0).toString();
+            document.getElementById('sl-serp').value = (cfg.shiftLight.matrixSerpentine !== undefined ? cfg.shiftLight.matrixSerpentine : false).toString();
+
+            matrixRows = Array(8).fill(2);
+            if (cfg.shiftLight.ledMode === 1) {
+                const mStart = cfg.shiftLight.matrixStartRow !== undefined ? cfg.shiftLight.matrixStartRow : 0;
+                const mRows = cfg.shiftLight.matrixRowCount !== undefined ? cfg.shiftLight.matrixRowCount : 1;
+                const gStart = cfg.shiftLight.gearStartRow !== undefined ? cfg.shiftLight.gearStartRow : 1;
+                const gRows = cfg.shiftLight.gearRowCount !== undefined ? cfg.shiftLight.gearRowCount : 7;
+                
+                for (let i = 0; i < mRows; i++) {
+                    let r = mStart + i;
+                    if (r >= 0 && r < 8) matrixRows[r] = 0;
+                }
+                for (let i = 0; i < gRows; i++) {
+                    let r = gStart + i;
+                    if (r >= 0 && r < 8) matrixRows[r] = 1;
+                }
+            } else {
+                matrixRows[0] = 0;
+                for (let r = 1; r < 8; r++) matrixRows[r] = 1;
+            }
+
             updateSlider('sl-startrpm');
             updateSlider('sl-endrpm');
             updateSlider('sl-bright');
-            toggleWifiFields();
             toggleGameFields();
-            drawLedPreview();
+            toggleLedModeFields();
+
+            const nav = document.querySelector('.tabs');
+            const wifiCardTitle = document.querySelector('#wifi-form').previousElementSibling;
+
+            if (isApModeActive) {
+                if (nav) nav.style.display = 'none';
+                document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+                document.getElementById('tab-net').classList.add('active');
+                document.getElementById('wifi-form').parentElement.style.margin = '0 auto';
+                document.getElementById('wifi-form').parentElement.style.maxWidth = '600px';
+                if (wifiCardTitle) wifiCardTitle.textContent = "Initial Wi-Fi Connection Setup";
+                showToast("Device is in Setup Mode. Please configure home Wi-Fi credentials.", false);
+            } else {
+                if (nav) nav.style.display = 'flex';
+                if (wifiCardTitle) wifiCardTitle.textContent = "Network Configuration";
+                document.getElementById('wifi-form').parentElement.style.margin = '';
+                document.getElementById('wifi-form').parentElement.style.maxWidth = '';
+                showTab('tab-dash');
+            }
         }
 
         function startPolling() {
@@ -909,6 +1294,11 @@
             fetch(`${deviceIp}/api/status`)
                 .then(res => res.json())
                 .then(data => {
+                    if (data.isApMode !== undefined && data.isApMode !== isApModeActive) {
+                        connectToDevice();
+                        return;
+                    }
+
                     document.getElementById('dash-rpm-val').textContent = `${Math.round(data.currentRpm)} / ${Math.round(data.maxRpm)} RPM`;
                     document.getElementById('dash-rpm-max').textContent = `${Math.round(data.maxRpm)} RPM Max`;
                     document.getElementById('dash-gear').textContent = data.gear === 0 ? 'R' : (data.gear === 1 ? 'N' : (data.gear - 1).toString());
@@ -929,15 +1319,15 @@
                         let slStart = parseFloat(document.getElementById('sl-startrpm').value);
                         let slEnd = parseFloat(document.getElementById('sl-endrpm').value);
                         let currentPct = (data.currentRpm / data.maxRpm) * 100;
+                        let gearIdx = data.gear;
                         
                         if (currentPct < slStart) {
-                            simulateLedPreview(0);
+                            simulateLedPreview(0, gearIdx);
                         } else if (currentPct >= slEnd) {
-                            const isEven = Math.floor(Date.now() / 80) % 2 === 0;
-                            simulateLedPreview(isEven ? 1.0 : 0);
+                            simulateLedPreview(1.0, gearIdx);
                         } else {
                             let fillPct = (currentPct - slStart) / (slEnd - slStart);
-                            simulateLedPreview(fillPct);
+                            simulateLedPreview(fillPct, gearIdx);
                         }
                     }
                 })
@@ -954,6 +1344,18 @@
             const payload = {};
 
             if (section === 'shiftLight') {
+                let shiftRows = [];
+                let gearRows = [];
+                for (let i = 0; i < 8; i++) {
+                    if (matrixRows[i] === 0) shiftRows.push(i);
+                    if (matrixRows[i] === 1) gearRows.push(i);
+                }
+
+                let matrixStartRow = shiftRows.length > 0 ? Math.min(...shiftRows) : 0;
+                let matrixRowCount = shiftRows.length;
+                let gearStartRow = gearRows.length > 0 ? Math.min(...gearRows) : 0;
+                let gearRowCount = gearRows.length;
+
                 payload.shiftLight = {
                     enabled: document.getElementById('sl-enabled').checked,
                     pin: parseInt(document.getElementById('sl-pin').value),
@@ -961,16 +1363,18 @@
                     startRpmPercent: parseFloat(document.getElementById('sl-startrpm').value),
                     endRpmPercent: parseFloat(document.getElementById('sl-endrpm').value),
                     brightness: parseInt(document.getElementById('sl-bright').value),
-                    colorScheme: parseInt(document.getElementById('sl-scheme').value)
+                    colorScheme: parseInt(document.getElementById('sl-scheme').value),
+                    ledMode: parseInt(document.getElementById('sl-mode').value) || 0,
+                    matrixSerpentine: document.getElementById('sl-serp').value === "true",
+                    matrixStartRow: matrixStartRow,
+                    matrixRowCount: matrixRowCount,
+                    gearStartRow: gearStartRow,
+                    gearRowCount: gearRowCount
                 };
             } else if (section === 'wifi') {
-                const opMode = document.getElementById('wifi-opmode').value;
                 payload.wifi = {
                     ssid: document.getElementById('wifi-ssid').value,
-                    password: document.getElementById('wifi-pass').value,
-                    apMode: (opMode === 'ap'),
-                    apName: document.getElementById('wifi-apname').value,
-                    apPassword: document.getElementById('wifi-appass').value
+                    password: document.getElementById('wifi-pass').value
                 };
             } else if (section === 'telemetry') {
                 payload.telemetry = {
@@ -989,6 +1393,11 @@
             .then(res => {
                 if (res.ok) {
                     showToast("Settings saved successfully!");
+                    if (section === 'wifi') {
+                        if (confirm("WiFi settings saved. Would you like to reboot the device now to connect?")) {
+                            deviceAction('reboot');
+                        }
+                    }
                 } else {
                     showToast("Failed to save settings", true);
                 }

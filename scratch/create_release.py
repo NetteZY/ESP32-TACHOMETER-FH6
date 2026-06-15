@@ -8,7 +8,7 @@ import sys
 def create_github_release():
     owner = "NetteZY"
     repo = "ESP32-TACHOMETER-FH6"
-    tag = "v1.0.0"
+    tag = "v1.1.0"
     
     # Read token
     token_path = "/home/kuraaku/ESP32-TELE/token"

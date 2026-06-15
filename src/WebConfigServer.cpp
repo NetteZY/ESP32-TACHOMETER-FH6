@@ -57,6 +57,7 @@ void WebConfigServer::handleGetStatus() {
     doc["isUpdating"] = telData.isUpdating;
     doc["packetsReceived"] = telData.packetsReceived;
     doc["uptimeSeconds"] = millis() / 1000;
+    doc["isApMode"] = (WiFi.getMode() == WIFI_AP) || (WiFi.status() != WL_CONNECTED);
 
     String response;
     serializeJson(doc, response);
@@ -65,14 +66,12 @@ void WebConfigServer::handleGetStatus() {
 
 void WebConfigServer::handleGetConfig() {
     JsonDocument doc;
+    doc["isApMode"] = (WiFi.getMode() == WIFI_AP) || (WiFi.status() != WL_CONNECTED);
     
     // WiFi
     JsonObject wifi = doc["wifi"].to<JsonObject>();
     wifi["ssid"] = config.wifi.ssid;
-    wifi["apMode"] = config.wifi.apMode;
-    wifi["apName"] = config.wifi.apName;
     wifi["password"] = (strlen(config.wifi.password) > 0) ? "••••••••" : "";
-    wifi["apPassword"] = (strlen(config.wifi.apPassword) > 0) ? "••••••••" : "";
 
     // Telemetry
     JsonObject telemetry = doc["telemetry"].to<JsonObject>();
@@ -90,6 +89,12 @@ void WebConfigServer::handleGetConfig() {
     sl["endRpmPercent"] = config.shiftLight.endRpmPercent;
     sl["brightness"] = config.shiftLight.brightness;
     sl["colorScheme"] = config.shiftLight.colorScheme;
+    sl["ledMode"] = config.shiftLight.ledMode;
+    sl["matrixSerpentine"] = config.shiftLight.matrixSerpentine;
+    sl["matrixStartRow"] = config.shiftLight.matrixStartRow;
+    sl["matrixRowCount"] = config.shiftLight.matrixRowCount;
+    sl["gearStartRow"] = config.shiftLight.gearStartRow;
+    sl["gearRowCount"] = config.shiftLight.gearRowCount;
 
     String response;
     serializeJson(doc, response);
@@ -121,14 +126,6 @@ void WebConfigServer::handleSaveConfig() {
             const char* pass = wifi["password"];
             if (strcmp(pass, "••••••••") != 0) {
                 strncpy(config.wifi.password, pass, sizeof(config.wifi.password) - 1);
-            }
-        }
-        if (wifi.containsKey("apMode")) config.wifi.apMode = wifi["apMode"];
-        if (wifi.containsKey("apName")) strncpy(config.wifi.apName, wifi["apName"], sizeof(config.wifi.apName) - 1);
-        if (wifi.containsKey("apPassword")) {
-            const char* apPass = wifi["apPassword"];
-            if (strcmp(apPass, "••••••••") != 0) {
-                strncpy(config.wifi.apPassword, apPass, sizeof(config.wifi.apPassword) - 1);
             }
         }
     }
@@ -163,6 +160,12 @@ void WebConfigServer::handleSaveConfig() {
         if (sl.containsKey("endRpmPercent")) config.shiftLight.endRpmPercent = sl["endRpmPercent"];
         if (sl.containsKey("brightness")) config.shiftLight.brightness = sl["brightness"];
         if (sl.containsKey("colorScheme")) config.shiftLight.colorScheme = sl["colorScheme"];
+        if (sl.containsKey("ledMode")) config.shiftLight.ledMode = sl["ledMode"];
+        if (sl.containsKey("matrixSerpentine")) config.shiftLight.matrixSerpentine = sl["matrixSerpentine"];
+        if (sl.containsKey("matrixStartRow")) config.shiftLight.matrixStartRow = sl["matrixStartRow"];
+        if (sl.containsKey("matrixRowCount")) config.shiftLight.matrixRowCount = sl["matrixRowCount"];
+        if (sl.containsKey("gearStartRow")) config.shiftLight.gearStartRow = sl["gearStartRow"];
+        if (sl.containsKey("gearRowCount")) config.shiftLight.gearRowCount = sl["gearRowCount"];
         
         shiftLightChanged = true;
     }

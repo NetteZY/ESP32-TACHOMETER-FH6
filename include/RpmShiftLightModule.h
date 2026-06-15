@@ -29,8 +29,10 @@ private:
     bool flashState;
     uint32_t lastFlashTimeMs;
 
-    void updateLeds(float currentRpm, float maxRpm, float idleRpm);
+    void updateLeds(const TelemetryData& data);
     uint32_t getColorForLed(uint8_t ledIndex, uint8_t totalLeds, float percent);
+    int getMatrixLedIndex(int x, int y, bool serpentine);
+    void drawGearMatrix(uint8_t gear, uint8_t startRow, uint8_t rowCount, uint32_t color, bool serpentine);
 };
 
 #endif // RPM_SHIFT_LIGHT_MODULE_H

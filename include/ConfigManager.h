@@ -7,9 +7,6 @@
 struct WiFiSettings {
     char ssid[32];
     char password[64];
-    bool apMode;
-    char apName[32];
-    char apPassword[64];
 };
 
 enum GameType {
@@ -34,6 +31,12 @@ struct ShiftLightSettings {
     float endRpmPercent;         // percentage of max RPM to flash shift indicator (e.g. 95%)
     uint8_t brightness;          // 0-255
     uint8_t colorScheme;         // 0 = Green->Yellow->Red, 1 = Blue->Cyan->Magenta, 2 = Rainbow
+    uint8_t ledMode;             // 0 = Single Strip, 1 = 8x8 Matrix
+    bool matrixSerpentine;       // true = serpentine, false = progressive
+    uint8_t matrixStartRow;      // Row index where shift lights start (0-7)
+    uint8_t matrixRowCount;      // How many rows shift lights occupy (1-8)
+    uint8_t gearStartRow;        // Row index where gear display starts (0-7)
+    uint8_t gearRowCount;        // How many rows gear display occupies (0-8)
 };
 
 class ConfigManager {
